@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Анимация алгоритмов burst-сети</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    min-height: 100vh;
+    padding: 16px;
+    background-image: 
+      radial-gradient(circle at 20% 0%, rgba(129, 140, 248, 0.2), transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(244, 114, 182, 0.18), transparent 50%);
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, #a78bfa, #fb7185);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+  .controls {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    backdrop-filter: blur(10px);
+  }
+  .control-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .control-group label {
+    font-size: 12px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input[type="range"] { width: 120px; accent-color: #a78bfa; }
+  input[type="radio"] { accent-color: #a78bfa; }
+  .value-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #ddd6fe;
+    min-width: 40px;
+    text-align: right;
+  }
+  button {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    color: white;
+    box-shadow: 0 2px 8px rgba(129, 140, 248, 0.4);
+  }
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.6);
+  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.secondary { background: rgba(255, 255, 255, 0.08); box-shadow: none; }
+  button.secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+  button.record {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    box-shadow: 0 2px 8px rgba(248, 113, 113, 0.4);
+  }
+  button.record:hover:not(:disabled) {     box-shadow: 0 4px 12px rgba(248, 113, 113, 0.6); }
+  button.record.recording { animation: pulse 1s infinite; }
+  button.record.done {     background: linear-gradient(135deg, #4ade80, #22c55e); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  .algorithms {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .algo-panel {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 14px;
+    backdrop-filter: blur(10px);
+  }
+  .algo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .algo-title { font-size: 15px; font-weight: 600; }
+  .algo-title.baseline { color: #fcd34d; }
+  .algo-title.optimized { color: #6ee7b7; }
+  .algo-complexity {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+  }
+  canvas {
+    width: 100%;
+    height: 380px;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: block;
+  }
+  .stats {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .stat {
+    background: rgba(255, 255, 255, 0.04);
+    padding: 8px 10px;
+    border-radius: 6px;
+    border-left: 2px solid #a78bfa;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #f1f5f9;
+    margin-top: 2px;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #818cf8, #a78bfa);
+    border-radius: 2px;
+    transition: width 0.1s;
+  }
+  .tree-selector {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .tree-selector label {
+    font-size: 13px;
+    color: #f1f5f9;
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    background: rgba(255,255,255,0.04);
+  }
+  .tree-selector label:hover { background: rgba(255,255,255,0.08); }
+  .tree-selector label:has(input:checked) {
+    background: rgba(129, 140, 248, 0.2);
+    border: 1px solid rgba(129, 140, 248, 0.4);
+  }
+  .record-status {
+    font-size: 12px;
+    color: #94a3b8;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    min-width: 150px;
+    text-align: center;
+  }
+  .record-status.active { 
+    color: #f87171; 
+    background: rgba(248, 113, 113, 0.15);
+    animation: blink 0.5s infinite;
+  }
+  .record-status.done { 
+    color: #4ade80; 
+    background: rgba(74, 222, 128, 0.15);
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .downloads {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .download-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.06);
+  }
+  .download-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+  .download-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .recording-badge {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #f87171;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: blink 0.5s infinite;
+  }
+  @media (max-width: 900px) {
+    .algorithms { grid-template-columns: 1fr; }
+    .controls { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🌳 Анимация алгоритмов burst-сети</h1>
+<div class="subtitle">Сравнение базового O(k·n) и оптимизированного O(n log n) алгоритмов вычисления величины всплеска</div>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Размер N:</label>
+    <input type="range" id="nSlider" min="8" max="24" value="12" step="2">
+    <span class="value-display" id="nValue">12</span>
+  </div>
+  <div class="control-group tree-selector">
+    <label>
+      <input type="radio" name="treeType" value="comb" checked>
+      <span>Гребёнка</span>
+    </label>
+    <label>
+      <input type="radio" name="treeType" value="balanced">
+      <span>Сбалансированное</span>
+    </label>
+  </div>
+  <div class="control-group">
+    <label>Скорость:</label>
+    <input type="range" id="speedSlider" min="50" max="800" value="300" step="50">
+    <span class="value-display" id="speedValue">300ms</span>
+  </div>
+  <button id="startBtn">▶ Запустить</button>
+  <button id="resetBtn" class="secondary">↻ Сбросить</button>
+  <button id="stepBtn" class="secondary">⏭ Шаг</button>
+  <button id="recordBtn" class="record">🔴 Записать WebM</button>
+  <span id="recordStatus" class="record-status">⏸ Готов</span>
+</div>
+
+<div class="algorithms">
+  <div class="algo-panel">
+    <div class="algo-header">
+      <div class="algo-title baseline">Базовый алгоритм</div>
+      <div class="algo-complexity">O(k · n)</div>
+    </div>
+    <canvas id="baselineCanvas"></canvas>
+    <div class="progress-bar"><div class="progress-fill" id="baselineProgress" style="width:0%"></div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Итерация</div><div class="stat-value" id="baselineIter">—</div></div>
+      <div class="stat"><div class="stat-label">Операций</div><div class="stat-value" id="baselineOps">0</div></div>
+      <div class="stat" style="border-left-color:#fb7185"><div class="stat-label">Σ F^(d)_max</div><div class="stat-value" id="baselineResult">—</div></div>
+    </div>
+  </div>
+
+  <div class="algo-panel">
+    <div class="algo-header">
+      <div class="algo-title optimized">Оптимизированный</div>
+      <div class="algo-complexity">O(n log n)</div>
+    </div>
+    <canvas id="optimizedCanvas"></canvas>
+    <div class="progress-bar"><div class="progress-fill" id="optimizedProgress" style="width:0%"></div></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Узел u</div><div class="stat-value" id="optimizedNode">—</div></div>
+      <div class="stat"><div class="stat-label">Переносов</div><div class="stat-value" id="optimizedMoves">0</div></div>
+      <div class="stat" style="border-left-color:#fb7185"><div class="stat-label">Σ M[1]</div><div class="stat-value" id="optimizedResult">—</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="controls" style="margin-top: -8px; padding: 10px 18px;">
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
+    <span style="font-size: 12px; color: #94a3b8;">📥 Скачать WebM:</span>
+    <button class="download-btn" id="downloadCombBaseline" disabled>Гребёнка · Базовый</button>
+    <button class="download-btn" id="downloadCombOptimized" disabled>Гребёнка · Оптимиз.</button>
+    <button class="download-btn" id="downloadBalancedBaseline" disabled>Сбаланс. · Базовый</button>
+    <button class="download-btn" id="downloadBalancedOptimized" disabled>Сбаланс. · Оптимиз.</button>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// 1. ГЕНЕРАЦИЯ ДЕРЕВЬЕВ
+// =====================================================================
+
+function generateCombTree(n) {
+  if (n < 4) n = 4;
+  const tree = { n, children: Array.from({length: n + 1}, () => []), cap: Array.from({length: n + 1}, () => []), incomingCap: new Array(n + 1).fill(0), depth: new Array(n + 1).fill(0), parent: new Array(n + 1).fill(0) };
+  function addEdge(u, v, c) { tree.children[u].push(v); tree.cap[u].push(c); tree.incomingCap[v] = c; tree.parent[v] = u; }
+  const spineLen = Math.floor(n / 2);
+  for (let i = 1; i < spineLen; ++i) addEdge(i, i + 1, 10.0);
+  for (let i = 1; i <= spineLen; ++i) { const leafId = spineLen + i; if (leafId <= n) addEdge(i, leafId, 100.0); }
+  for (let i = 2 * spineLen + 1; i <= n; ++i) addEdge(1, i, 100.0);
+  return tree;
+}
+
+function generateBalancedTree(n) {
+  if (n < 4) n = 4;
+  const tree = { n, children: Array.from({length: n + 1}, () => []), cap: Array.from({length: n + 1}, () => []), incomingCap: new Array(n + 1).fill(0), depth: new Array(n + 1).fill(0), parent: new Array(n + 1).fill(0) };
+  function addEdge(u, v, c) { tree.children[u].push(v); tree.cap[u].push(c); tree.incomingCap[v] = c; tree.parent[v] = u; }
+  let nextId = 2; const queue = [1];
+  while (queue.length > 0 && nextId <= n) {
+    const u = queue.shift();
+    if (nextId <= n) { addEdge(u, nextId, 10.0); queue.push(nextId); nextId++; }
+    if (nextId <= n) { addEdge(u, nextId, 10.0); queue.push(nextId); nextId++; }
+  }
+  return tree;
+}
+
+function calculateDepths(tree) {
+  const q = [1]; tree.depth[1] = 0;
+  while (q.length) { const u = q.shift(); for (const v of tree.children[u]) { tree.depth[v] = tree.depth[u] + 1; q.push(v); } }
+}
+
+function getBottomUpOrder(tree) {
+  const order = []; const q = [1];
+  while (q.length) { const u = q.shift(); order.push(u); for (const v of tree.children[u]) q.push(v); }
+  return order.reverse();
+}
+
+// =====================================================================
+// 2. АНИМАТОР (сокращённый, только ключевые методы)
+// =====================================================================
+
+class AlgorithmAnimator {
+  constructor(canvas, type) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.type = type;
+    this.tree = null;
+    this.positions = null;
+    this.steps = [];
+    this.currentStep = 0;
+    this.state = null;
+    this.depthStartCount = 0;
+    this.totalSteps = 0;
+  }
+  
+  resize() {
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = rect.width * dpr;
+    this.canvas.height = rect.height * dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(dpr, dpr);
+    this.canvasW = rect.width;
+    this.canvasH = rect.height;
+  }
+  
+  init(tree) {
+    this.tree = JSON.parse(JSON.stringify(tree));
+    calculateDepths(this.tree);
+    this.resize();
+    this.positions = this.computeLayout();
+    this.buildSteps();
+    this.currentStep = 0;
+    this.totalSteps = this.steps.length;
+    this.state = {
+      activeNode: null,
+      processedNodes: new Set(),
+      activeEdges: [],
+      dp: new Array(this.tree.n + 1).fill(0),
+      M: Array.from({length: this.tree.n + 1}, () => new Map()),
+      currentDepth: null,
+      iterCount: 0,
+      opsCount: 0,
+      moveCount: 0,
+      totalSum: 0,
+      currentFmax: null,
+      finalSum: null,
+      infinityLeaves: new Set(),
+      vmaxNode: null,
+      vmaxInfo: null
+    };
+  }
+  
+  computeLayout() {
+    const tree = this.tree;
+    const positions = new Array(tree.n + 1).fill(null);
+    const subtreeLeaves = new Array(tree.n + 1).fill(0);
+    const countLeaves = (u) => {
+      if (tree.children[u].length === 0) { subtreeLeaves[u] = 1; return 1; }
+      let s = 0; for (const v of tree.children[u]) s += countLeaves(v);
+      subtreeLeaves[u] = s; return s;
+    };
+    countLeaves(1);
+    let maxDepth = 0;
+    for (let u = 1; u <= tree.n; ++u) if (tree.depth[u] > maxDepth) maxDepth = tree.depth[u];
+    const W = this.canvasW, H = this.canvasH, padX = 30, padY = 30;
+    const assign = (u, left, right, depth) => {
+      const y = padY + (maxDepth > 0 ? (depth / maxDepth) * (H - 2 * padY) : 0);
+      const x = (left + right) / 2;
+      positions[u] = {x, y};
+      if (tree.children[u].length === 0) return;
+      const total = subtreeLeaves[u];
+      let curLeft = left;
+      for (const v of tree.children[u]) {
+        const w = (subtreeLeaves[v] / total) * (right - left);
+        assign(v, curLeft, curLeft + w, depth + 1);
+        curLeft += w;
+      }
+    };
+    assign(1, padX, W - padX, 0);
+    return positions;
+  }
+  
+  buildSteps() {
+    this.steps = [];
+    if (this.type === 'baseline') this.buildBaselineSteps();
+    else this.buildOptimizedSteps();
+  }
+  
+  buildBaselineSteps() {
+    const tree = this.tree;
+    const order = getBottomUpOrder(tree);
+    const depthSet = new Set();
+    for (let u = 1; u <= tree.n; ++u) if (tree.children[u].length === 0) depthSet.add(tree.depth[u]);
+    const depths = [...depthSet].sort((a, b) => a - b);
+    this.depthStartCount = depths.length;
+    this.steps.push({type: 'init'});
+    for (let iterIdx = 0; iterIdx < depths.length; ++iterIdx) {
+      const d = depths[iterIdx];
+      this.steps.push({type: 'depth-start', depth: d, iterNum: iterIdx + 1});
+      for (const u of order) {
+        if (tree.children[u].length === 0) {
+          const val = (tree.depth[u] === d) ? Infinity : 0;
+          this.steps.push({type: 'process-leaf', node: u, value: val, isInfinity: tree.depth[u] === d});
+        } else {
+          this.steps.push({type: 'process-node', node: u});
+        }
+      }
+      this.steps.push({type: 'depth-end'});
+    }
+    this.steps.push({type: 'done'});
+  }
+  
+  buildOptimizedSteps() {
+    const tree = this.tree;
+    const order = getBottomUpOrder(tree);
+    this.steps.push({type: 'init'});
+    this.depthStartCount = 1;
+    for (const u of order) {
+      if (tree.children[u].length === 0) {
+        this.steps.push({type: 'process-leaf', node: u, depth: tree.depth[u]});
+      } else {
+        this.steps.push({type: 'find-largest', node: u});
+        for (let i = 0; i < tree.children[u].length; ++i) {
+          const v = tree.children[u][i];
+          this.steps.push({type: 'merge-child', node: u, child: v, edgeIdx: i});
+        }
+        this.steps.push({type: 'process-node', node: u});
+      }
+    }
+    this.steps.push({type: 'done'});
+  }
+  
+  executeStep() {
+    if (this.currentStep >= this.steps.length) return null;
+    const step = this.steps[this.currentStep];
+    this.currentStep++;
+    const s = this.state;
+    s.activeEdges = [];
+    switch(step.type) {
+      case 'init': s.activeNode = null; break;
+      case 'depth-start': s.currentDepth = step.depth; s.iterCount = step.iterNum; s.activeNode = null; s.processedNodes.clear(); s.dp.fill(0); s.infinityLeaves.clear(); s.currentFmax = null; break;
+      case 'depth-end': s.activeNode = null; s.currentFmax = s.dp[1]; s.totalSum += s.dp[1]; break;
+      case 'process-leaf':
+        s.activeNode = step.node; s.processedNodes.add(step.node);
+        if (this.type === 'baseline') { s.dp[step.node] = step.value; if (step.isInfinity) s.infinityLeaves.add(step.node); }
+        else { const m = new Map(); m.set(step.depth, Infinity); s.M[step.node] = m; }
+        s.opsCount++; break;
+      case 'process-node':
+        s.activeNode = step.node; s.processedNodes.add(step.node);
+        if (this.type === 'baseline') {
+          let total = 0;
+          for (let i = 0; i < this.tree.children[step.node].length; ++i) {
+            const v = this.tree.children[step.node][i];
+            total += Math.min(this.tree.cap[step.node][i], s.dp[v]);
+          }
+          s.dp[step.node] = total;
+        } else {
+          const moves = this.performMerge(step.node);
+          s.moveCount += moves;
+        }
+        s.opsCount++; break;
+      case 'find-largest':
+        s.activeNode = step.node;
+        const vmax = this.findVMax(step.node);
+        s.vmaxNode = vmax;
+        s.vmaxInfo = {node: vmax, size: s.M[vmax] ? s.M[vmax].size : 0};
+        break;
+      case 'merge-child':
+        s.activeNode = step.node;
+        s.activeEdges.push([step.node, step.child]);
+        s.opsCount++;
+        break;
+      case 'done':
+        s.activeNode = null;
+        if (this.type === 'optimized') {
+          let sum = 0;
+          if (s.M[1]) { for (const v of s.M[1].values()) sum += v; }
+          s.finalSum = sum;
+        }
+        break;
+    }
+    return step;
+  }
+  
+  findVMax(u) {
+    const tree = this.tree, s = this.state;
+    let bestI = 0, bestSize = 0;
+    for (let i = 0; i < tree.children[u].length; ++i) {
+      const v = tree.children[u][i];
+      const size = s.M[v] ? s.M[v].size : 0;
+      if (size > bestSize) { bestSize = size; bestI = i; }
+    }
+    return tree.children[u][bestI];
+  }
+  
+  performMerge(u) {
+    const tree = this.tree, s = this.state;
+    if (tree.children[u].length === 0) return 0;
+    let bestI = 0, bestSize = 0;
+    for (let i = 0; i < tree.children[u].length; ++i) {
+      const v = tree.children[u][i];
+      const size = s.M[v] ? s.M[v].size : 0;
+      if (size > bestSize) { bestSize = size; bestI = i; }
+    }
+    const vmax = tree.children[u][bestI], cvmax = tree.cap[u][bestI];
+    const newM = new Map();
+    if (s.M[vmax]) { for (const [d, val] of s.M[vmax]) newM.set(d, Math.min(cvmax, val)); }
+    let moves = 0;
+    for (let i = 0; i < tree.children[u].length; ++i) {
+      if (i === bestI) continue;
+      const v = tree.children[u][i], cv = tree.cap[u][i];
+      if (!s.M[v]) continue;
+      for (const [d, val] of s.M[v]) {
+        const term = Math.min(cv, val);
+        const cur = newM.get(d) || 0;
+        newM.set(d, cur + term);
+        moves++;
+      }
+      s.M[v] = new Map();
+    }
+    s.M[u] = newM;
+    s.M[vmax] = new Map();
+    return moves;
+  }
+  
+  draw() {
+    const ctx = this.ctx, W = this.canvasW, H = this.canvasH;
+    ctx.clearRect(0, 0, W, H);
+    if (!this.tree || !this.positions) return;
+    const tree = this.tree, s = this.state;
+    for (let u = 1; u <= tree.n; ++u) {
+      for (let i = 0; i < tree.children[u].length; ++i) {
+        const v = tree.children[u][i];
+        const p1 = this.positions[u], p2 = this.positions[v];
+        if (!p1 || !p2) continue;
+        const isActive = s.activeEdges.some(([a, b]) => a === u && b === v);
+        const isVmaxEdge = s.vmaxNode === v && s.activeNode === u;
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+        if (isActive) { ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 3.5; }
+        else if (isVmaxEdge) { ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 3; ctx.setLineDash([4, 4]); }
+        else { ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)'; ctx.lineWidth = 1; ctx.setLineDash([]); }
+        ctx.stroke(); ctx.setLineDash([]);
+        const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+        const dx = p2.x - p1.x, dy = p2.y - p1.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        let nx = -dy / len, ny = dx / len;
+        if (ny > 0) { nx = -nx; ny = -ny; }
+        const offset = 12;
+        ctx.font = 'bold 10px JetBrains Mono';
+        ctx.fillStyle = isActive || isVmaxEdge ? '#fb7185' : 'rgba(203, 213, 225, 0.8)';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(tree.cap[u][i], mx + nx * offset, my + ny * offset);
+      }
+    }
+    for (let u = 1; u <= tree.n; ++u) {
+      const p = this.positions[u];
+      if (!p) continue;
+      const isLeaf = tree.children[u].length === 0;
+      const isActive = s.activeNode === u;
+      const isProcessed = s.processedNodes.has(u);
+      const isInfinity = s.infinityLeaves.has(u);
+      const isVMax = s.vmaxNode === u;
+      let color = '#64748b';
+      let radius = isLeaf ? 7 : 9;
+      if (isActive) { color = '#fbbf24'; radius += 2; }
+      else if (isInfinity) { color = '#22d3ee'; }
+      else if (isVMax && isActive) { color = '#c084fc'; radius += 2; }
+      else if (isVMax) { color = '#c084fc'; }
+      else if (isProcessed) { color = '#a78bfa'; }
+      else if (isLeaf) { color = '#34d399'; }
+      ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.font = 'bold 11px JetBrains Mono'; ctx.fillStyle = '#f1f5f9';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(u, p.x, p.y - radius - 8);
+      let label = '';
+      if (this.type === 'baseline') {
+        if (s.dp[u] !== 0 || isProcessed) label = s.dp[u] === Infinity ? '∞' : s.dp[u] !== 0 ? s.dp[u].toFixed(0) : '';
+      } else {
+        if (s.M[u] && s.M[u].size > 0) {
+          const entries = [...s.M[u].entries()];
+          if (entries.length <= 3) label = entries.map(([d, v]) => `${d}:${v === Infinity ? '∞' : v.toFixed(0)}`).join(' ');
+          else label = `${entries.length} зап.`;
+          const sizeLabel = `|M|=${s.M[u].size}`;
+          ctx.font = '8px JetBrains Mono';         ctx.fillStyle = '#94a3b8';
+          ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+          ctx.fillText(sizeLabel, p.x - 6, p.y - radius - 10);
+        }
+      }
+      if (label) {
+        ctx.font = '9px JetBrains Mono'; ctx.fillStyle = '#fcd34d';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(label, p.x, p.y + radius + 3);
+      }
+    }
+    if (this.type === 'baseline' && s.currentDepth !== null) {
+      ctx.font = 'bold 13px JetBrains Mono'; ctx.fillStyle = '#fcd34d';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.fillText(`Итерация ${s.iterCount}/${this.depthStartCount} | d=${s.currentDepth}`, 10, 10);
+    } else if (this.type === 'optimized' && s.activeNode !== null) {
+      ctx.font = 'bold 13px JetBrains Mono'; ctx.fillStyle = '#6ee7b7';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      const info = s.vmaxNode ? `v_max=${s.vmaxNode} (|M|=${s.vmaxInfo?.size || '?'})` : '';
+      ctx.fillText(`u=${s.activeNode} ${info}`, 10, 10);
+    }
+  }
+  
+  getProgress() { return this.currentStep / Math.max(1, this.totalSteps); }
+  getStats() {
+    const s = this.state;
+    return { opsCount: s.opsCount, moveCount: s.moveCount, totalSum: s.totalSum, finalSum: s.finalSum, iterCount: s.iterCount, depthStartCount: this.depthStartCount, currentDepth: s.currentDepth };
+  }
+}
+
+// =====================================================================
+// 3. ГЛАВНАЯ ЛОГИКА
+// =====================================================================
+
+const baselineCanvas = document.getElementById('baselineCanvas');
+const optimizedCanvas = document.getElementById('optimizedCanvas');
+
+const baselineAnim = new AlgorithmAnimator(baselineCanvas, 'baseline');
+const optimizedAnim = new AlgorithmAnimator(optimizedCanvas, 'optimized');
+
+const nSlider = document.getElementById('nSlider');
+const nValue = document.getElementById('nValue');
+const speedSlider = document.getElementById('speedSlider');
+const speedValue = document.getElementById('speedValue');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const stepBtn = document.getElementById('stepBtn');
+const recordBtn = document.getElementById('recordBtn');
+const recordStatus = document.getElementById('recordStatus');
+
+let currentN = 12;
+let currentTreeType = 'comb';
+let speed = 300;
+let running = false;
+let animationTimer = null;
+let isRecording = false;
+let isProcessing = false;
+let recordedFrames = { baseline: [], optimized: [] };
+let videoUrls = { baseline: null, optimized: null };
+let frameCaptureInterval = null;
+
+function fmtNum(x) {
+  if (x === null || x === undefined) return '—';
+  if (x === Infinity) return '∞';
+  if (!isFinite(x)) return '—';
+  if (Number.isInteger(x)) return x.toString();
+  return x.toFixed(1);
+}
+
+function generateTree(n, type) {
+  if (type === 'balanced') return generateBalancedTree(n);
+  return generateCombTree(n);
+}
+
+function initTree() {
+  const tree = generateTree(currentN, currentTreeType);
+  calculateDepths(tree);
+  baselineAnim.init(tree);
+  optimizedAnim.init(tree);
+  baselineAnim.draw();
+  optimizedAnim.draw();
+  updateStats();
+  updateProgress();
+  document.querySelectorAll('.download-btn').forEach(b => { b.disabled = true; });
+}
+
+function updateStats() {
+  const bs = baselineAnim.getStats();
+  const os = optimizedAnim.getStats();
+  document.getElementById('baselineIter').textContent = bs.iterCount > 0 ? `${bs.iterCount}/${bs.depthStartCount}` : '—';
+  document.getElementById('baselineOps').textContent = bs.opsCount;
+  document.getElementById('baselineResult').textContent = fmtNum(bs.totalSum);
+  document.getElementById('optimizedNode').textContent = optimizedAnim.state.activeNode !== null ? `u=${optimizedAnim.state.activeNode}` : '—';
+  document.getElementById('optimizedMoves').textContent = os.moveCount;
+  if (os.finalSum !== null) document.getElementById('optimizedResult').textContent = fmtNum(os.finalSum);
+  else if (optimizedAnim.state.M[1] && optimizedAnim.state.M[1].size > 0) {
+    let sum = 0; for (const v of optimizedAnim.state.M[1].values()) sum += v;
+    document.getElementById('optimizedResult').textContent = fmtNum(sum);
+  } else document.getElementById('optimizedResult').textContent = '—';
+}
+
+function updateProgress() {
+  document.getElementById('baselineProgress').style.width = (baselineAnim.getProgress() * 100) + '%';
+  document.getElementById('optimizedProgress').style.width = (optimizedAnim.getProgress() * 100) + '%';
+}
+
+// =====================================================================
+// ОСНОВНОЙ ЦИКЛ АНИМАЦИИ — ПРОСТОЙ И НАДЁЖНЫЙ
+// =====================================================================
+
+function animationTick() {
+  // Выполняем один шаг анимации
+  baselineAnim.executeStep();
+  optimizedAnim.executeStep();
+  baselineAnim.draw();
+  optimizedAnim.draw();
+  
+  updateStats();
+  updateProgress();
+  
+  const done = baselineAnim.currentStep >= baselineAnim.steps.length && 
+               optimizedAnim.currentStep >= optimizedAnim.steps.length;
+  
+  if (done) {
+    if (isRecording) {
+      // Останавливаем захват кадров
+      if (frameCaptureInterval) {
+        clearInterval(frameCaptureInterval);
+        frameCaptureInterval = null;
+      }
+      finishRecording();
+    }
+    if (running) {
+      running = false;
+      startBtn.disabled = false;
+      startBtn.textContent = '▶ Запустить';
+    }
+    return;
+  }
+  
+  // Продолжаем анимацию с фиксированной задержкой
+  if (running) {
+    animationTimer = setTimeout(animationTick, speed);
+  }
+}
+
+// Отдельный таймер для захвата кадров во время записи
+function startFrameCapture() {
+  if (frameCaptureInterval) clearInterval(frameCaptureInterval);
+  
+  // Захватываем кадры каждые 50ms (20 FPS) — этого достаточно для анимации
+  frameCaptureInterval = setInterval(() => {
+    if (isRecording && running) {
+      recordedFrames.baseline.push(baselineCanvas.toDataURL('image/png'));
+      recordedFrames.optimized.push(optimizedCanvas.toDataURL('image/png'));
+      recordStatus.textContent = `🔴 Кадров: ${recordedFrames.baseline.length}`;
+    }
+  }, 50);
+}
+
+function start() {
+  if (running) return;
+  running = true;
+  startBtn.disabled = true;
+  startBtn.textContent = '⏸ Выполняется...';
+  
+  // Если идёт запись, запускаем захват кадров
+  if (isRecording) {
+    startFrameCapture();
+  }
+  
+  animationTimer = setTimeout(animationTick, 10);
+}
+
+function stop() {
+  running = false;
+  if (animationTimer) {
+    clearTimeout(animationTimer);
+    animationTimer = null;
+  }
+  if (frameCaptureInterval) {
+    clearInterval(frameCaptureInterval);
+    frameCaptureInterval = null;
+  }
+  startBtn.disabled = false;
+  startBtn.textContent = '▶ Запустить';
+}
+
+function reset() {
+  stop();
+  if (isRecording) {
+    isRecording = false;
+    recordedFrames = { baseline: [], optimized: [] };
+    recordBtn.textContent = '🔴 Записать WebM';
+    recordBtn.className = 'record';
+    recordStatus.textContent = '⏸ Запись прервана';
+    recordStatus.className = 'record-status';
+  }
+  if (isProcessing) {
+    isProcessing = false;
+  }
+  Object.keys(videoUrls).forEach(key => {
+    if (videoUrls[key]) { URL.revokeObjectURL(videoUrls[key]); videoUrls[key] = null; }
+  });
+  initTree();
+  updateProgress();
+}
+
+// =====================================================================
+// ЗАПИСЬ
+// =====================================================================
+
+function startRecording() {
+  if (isRecording || isProcessing) return;
+  
+  reset();
+  initTree();
+  
+  isRecording = true;
+  recordedFrames = { baseline: [], optimized: [] };
+  
+  recordBtn.textContent = '⏹ Остановить запись';
+  recordBtn.className = 'record recording';
+  recordStatus.textContent = '🔴 Запись... (0 кадров)';
+  recordStatus.className = 'record-status active';
+  
+  start();
+}
+
+function finishRecording() {
+  isRecording = false;
+  if (frameCaptureInterval) {
+    clearInterval(frameCaptureInterval);
+    frameCaptureInterval = null;
+  }
+  
+  recordBtn.textContent = '⏳ Создание видео...';
+  recordBtn.className = 'record';
+  recordStatus.textContent = '⏳ Создание WebM...';
+  recordStatus.className = 'record-status';
+  
+  isProcessing = true;
+  
+  // Захватываем последний кадр, если его нет
+  if (recordedFrames.baseline.length === 0) {
+    recordedFrames.baseline.push(baselineCanvas.toDataURL('image/png'));
+    recordedFrames.optimized.push(optimizedCanvas.toDataURL('image/png'));
+  }
+  
+  Promise.all([
+    createVideoFromFrames(recordedFrames.baseline, 'baseline'),
+    createVideoFromFrames(recordedFrames.optimized, 'optimized')
+  ]).then(() => {
+    isProcessing = false;
+    recordBtn.textContent = '✅ Готово!';
+    recordBtn.className = 'record done';
+    recordStatus.textContent = '✅ Видео готовы! Скачайте ниже';
+    recordStatus.className = 'record-status done';
+    
+    const treeName = currentTreeType === 'comb' ? 'comb' : 'balanced';
+    ['baseline', 'optimized'].forEach(type => {
+      const key = treeName + type.charAt(0).toUpperCase() + type.slice(1);
+      const btn = document.getElementById('download' + key.charAt(0).toUpperCase() + key.slice(1));
+      if (btn && videoUrls[type]) {
+        btn.disabled = false;
+        const label = treeName === 'comb' ? 'Гребёнка' : 'Сбаланс.';
+        const algo = type === 'baseline' ? 'Базовый' : 'Оптимиз.';
+        btn.textContent = `⬇ ${label} · ${algo}`;
+      }
+    });
+  }).catch((err) => {
+    console.error('Ошибка создания видео:', err);
+    isProcessing = false;
+    recordBtn.textContent = '❌ Ошибка';
+    recordBtn.className = 'record';
+    recordStatus.textContent = '❌ Ошибка создания видео';
+    recordStatus.className = 'record-status';
+  });
+}
+
+function createVideoFromFrames(frames, type) {
+  return new Promise((resolve, reject) => {
+    if (frames.length === 0) {
+      console.warn(`Нет кадров для ${type}`);
+      videoUrls[type] = null;
+      resolve();
+      return;
+    }
+    
+    console.log(`Создание видео для ${type}, кадров: ${frames.length}`);
+    
+    const img = new Image();
+    img.onload = function() {
+      const videoCanvas = document.createElement('canvas');
+      videoCanvas.width = img.width;
+      videoCanvas.height = img.height;
+      const ctx = videoCanvas.getContext('2d');
+      
+      const mimeType = getSupportedMimeType();
+      if (!mimeType) {
+        reject(new Error('Браузер не поддерживает запись видео'));
+        return;
+      }
+      
+      const chunks = [];
+      const stream = videoCanvas.captureStream(30);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+        videoBitsPerSecond: 2000000
+      });
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+      
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: mimeType });
+        console.log(`[${type}] Видео создано: ${blob.size} байт`);
+        
+        if (blob.size > 0) {
+          const url = URL.createObjectURL(blob);
+          videoUrls[type] = url;
+          resolve();
+        } else {
+          reject(new Error(`Видео для ${type} пустое`));
+        }
+      };
+      
+      recorder.onerror = (e) => {
+        reject(e);
+      };
+      
+      recorder.start(100);
+      
+      let frameIndex = 0;
+      const drawFrame = () => {
+        if (frameIndex >= frames.length) {
+          recorder.requestData();
+          setTimeout(() => {
+            if (recorder.state === 'recording') {
+              recorder.stop();
+            }
+          }, 200);
+          return;
+        }
+        
+        const imgFrame = new Image();
+        imgFrame.onload = () => {
+          ctx.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+          ctx.drawImage(imgFrame, 0, 0);
+          recorder.requestData();
+          frameIndex++;
+          setTimeout(drawFrame, 50);
+        };
+        imgFrame.onerror = () => {
+          frameIndex++;
+          setTimeout(drawFrame, 50);
+        };
+        imgFrame.src = frames[frameIndex];
+      };
+      
+      drawFrame();
+    };
+    img.onerror = () => {
+      if (frames.length > 1) {
+        const img2 = new Image();
+        img2.onload = function() {
+          const videoCanvas = document.createElement('canvas');
+          videoCanvas.width = img2.width;
+          videoCanvas.height = img2.height;
+          const ctx = videoCanvas.getContext('2d');
+          
+          const mimeType = getSupportedMimeType();
+          if (!mimeType) {
+            reject(new Error('Браузер не поддерживает запись видео'));
+            return;
+          }
+          
+          const chunks = [];
+          const stream = videoCanvas.captureStream(30);
+          const recorder = new MediaRecorder(stream, {
+            mimeType: mimeType,
+            videoBitsPerSecond: 2000000
+          });
+          
+          recorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) {
+              chunks.push(e.data);
+            }
+          };
+          
+          recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: mimeType });
+            console.log(`[${type}] Видео создано: ${blob.size} байт`);
+            
+            if (blob.size > 0) {
+              const url = URL.createObjectURL(blob);
+              videoUrls[type] = url;
+              resolve();
+            } else {
+              reject(new Error(`Видео для ${type} пустое`));
+            }
+          };
+          
+          recorder.onerror = (e) => {
+            reject(e);
+          };
+          
+          recorder.start(100);
+          
+          let frameIndex = 0;
+          const drawFrame = () => {
+            if (frameIndex >= frames.length) {
+              recorder.requestData();
+              setTimeout(() => {
+                if (recorder.state === 'recording') {
+                  recorder.stop();
+                }
+              }, 200);
+              return;
+            }
+            
+            const imgFrame = new Image();
+            imgFrame.onload = () => {
+              ctx.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+              ctx.drawImage(imgFrame, 0, 0);
+              recorder.requestData();
+              frameIndex++;
+              setTimeout(drawFrame, 50);
+            };
+            imgFrame.onerror = () => {
+              frameIndex++;
+              setTimeout(drawFrame, 50);
+            };
+            imgFrame.src = frames[frameIndex];
+          };
+          
+          drawFrame();
+        };
+        img2.src = frames[1];
+      } else {
+        reject(new Error(`Не удалось загрузить кадры для ${type}`));
+      }
+    };
+    img.src = frames[0];
+  });
+}
+
+function getSupportedMimeType() {
+  const codecs = [
+    'video/webm;codecs=vp9',
+    'video/webm;codecs=vp8',
+    'video/webm;codecs=h264',
+    'video/webm',
+    'video/mp4'
+  ];
+  for (const codec of codecs) {
+    try { if (MediaRecorder.isTypeSupported(codec)) return codec; } catch(e) {}
+  }
+  return null;
+}
+
+function downloadVideo(key) {
+  const type = key.includes('baseline') ? 'baseline' : 'optimized';
+  const url = videoUrls[type];
+  
+  if (url) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = key + '.webm';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    console.log(`Скачивание: ${key}.webm`);
+  } else {
+    alert('Видео ещё не готово. Подождите завершения обработки.');
+  }
+}
+
+// =====================================================================
+// 4. ОБРАБОТЧИКИ СОБЫТИЙ
+// =====================================================================
+
+nSlider.addEventListener('input', (e) => {
+  currentN = parseInt(e.target.value);
+  nValue.textContent = currentN;
+});
+
+nSlider.addEventListener('change', () => {
+  if (!running && !isRecording && !isProcessing) reset();
+});
+
+speedSlider.addEventListener('input', (e) => {
+  speed = parseInt(e.target.value);
+  speedValue.textContent = speed + 'ms';
+});
+
+document.querySelectorAll('input[name="treeType"]').forEach(el => {
+  el.addEventListener('change', (e) => {
+    currentTreeType = e.target.value;
+    if (!running && !isRecording && !isProcessing) reset();
+  });
+});
+
+startBtn.addEventListener('click', () => {
+  if (running) stop();
+  else start();
+});
+
+resetBtn.addEventListener('click', reset);
+
+stepBtn.addEventListener('click', () => {
+  if (!running && !isRecording && !isProcessing) {
+    baselineAnim.executeStep();
+    optimizedAnim.executeStep();
+    baselineAnim.draw();
+    optimizedAnim.draw();
+    updateStats();
+    updateProgress();
+  }
+});
+
+recordBtn.addEventListener('click', () => {
+  if (isRecording) {
+    isRecording = false;
+    if (running) stop();
+    finishRecording();
+  } else if (recordBtn.textContent.includes('✅')) {
+    reset();
+  } else if (!isProcessing) {
+    startRecording();
+  }
+});
+
+document.querySelectorAll('.download-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const key = this.id.replace('download', '').toLowerCase();
+    downloadVideo(key);
+  });
+});
+
+window.addEventListener('resize', () => {
+  baselineAnim.resize();
+  baselineAnim.positions = baselineAnim.computeLayout();
+  optimizedAnim.resize();
+  optimizedAnim.positions = optimizedAnim.computeLayout();
+  baselineAnim.draw();
+  optimizedAnim.draw();
+});
+
+initTree();
+console.log('✅ Демо готово. Используйте "Записать WebM" для создания видео.');
+</script>
+</body>
+</html>

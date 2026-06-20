@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+myenv/
+
+# C++ build artifacts
+*.exe
+*.o
+*.obj
+*.out
+experiment
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.VC.db
+*.VC.VC.opendb
+*.suo
+*.sdf
+*.opensdf
+*.opendb
+*.ncb
+*.aps
+ipch/
+*.cachefile
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated videos
+*.webm
