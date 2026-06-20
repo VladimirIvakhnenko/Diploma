@@ -2,128 +2,183 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Анимация алгоритмов burst-сети</title>
+<title>Анимация алгоритмов</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.0/index.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f0f2f5;
+    --surface:   #ffffff;
+    --border:    #d0d5df;
+    --text:      #111827;
+    --text-muted:#6b7280;
+    --accent:    #2563eb;
+    --accent2:   #7c3aed;
+    --shadow:    0 1px 4px rgba(0,0,0,.10), 0 4px 16px rgba(0,0,0,.06);
+  }
+
   body {
     font-family: 'Inter', sans-serif;
-    background: #0f172a;
-    color: #f1f5f9;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
-    padding: 16px;
-    background-image: 
-      radial-gradient(circle at 20% 0%, rgba(129, 140, 248, 0.2), transparent 50%),
-      radial-gradient(circle at 80% 100%, rgba(244, 114, 182, 0.18), transparent 50%);
+    padding: 20px;
   }
-  h1 {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    background: linear-gradient(90deg, #a78bfa, #fb7185);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
+
+  /* ── Controls ────────────────────────────────────────── */
   .controls {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
     margin-bottom: 16px;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
-    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
   }
-  .control-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .divider { width: 1px; height: 28px; background: var(--border); }
+
+  .control-group { display: flex; align-items: center; gap: 8px; }
   .control-group label {
-    font-size: 12px;
-    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: .6px;
+    white-space: nowrap;
   }
-  input[type="range"] { width: 120px; accent-color: #a78bfa; }
-  input[type="radio"] { accent-color: #a78bfa; }
+  input[type="range"] {
+    width: 110px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
   .value-display {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: #ddd6fe;
-    min-width: 40px;
-    text-align: right;
+    font-size: 12px;
+    color: var(--accent);
+    min-width: 38px;
+    font-weight: 600;
   }
+
+  .radio-group { display: flex; gap: 6px; }
+  .radio-pill {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    transition: all .15s;
+    user-select: none;
+  }
+  .radio-pill:has(input:checked) {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .radio-pill input { display: none; }
+
+  /* Buttons */
   button {
     font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border: 1.5px solid transparent;
+    border-radius: 7px;
     cursor: pointer;
-    transition: all 0.2s;
-    background: linear-gradient(135deg, #818cf8, #a78bfa);
-    color: white;
-    box-shadow: 0 2px 8px rgba(129, 140, 248, 0.4);
+    transition: all .15s;
+    letter-spacing: .2px;
   }
-  button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.6);
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 1px 3px rgba(37,99,235,.3);
   }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button.secondary { background: rgba(255, 255, 255, 0.08); box-shadow: none; }
-  button.secondary:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
-  button.record {
-    background: linear-gradient(135deg, #f87171, #ef4444);
-    box-shadow: 0 2px 8px rgba(248, 113, 113, 0.4);
+  .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
   }
-  button.record:hover:not(:disabled) {     box-shadow: 0 4px 12px rgba(248, 113, 113, 0.6); }
-  button.record.recording { animation: pulse 1s infinite; }
-  button.record.done {     background: linear-gradient(135deg, #4ade80, #22c55e); }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
+  .btn-secondary:hover:not(:disabled) { background: var(--bg); }
+  button:disabled { opacity: .38; cursor: not-allowed; }
+
+  /* ── Algorithm panels ────────────────────────────────── */
   .algorithms {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
     margin-bottom: 16px;
   }
+
   .algo-panel {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 14px;
-    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
   }
+
   .algo-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
   }
-  .algo-title { font-size: 15px; font-weight: 600; }
-  .algo-title.baseline { color: #fcd34d; }
-  .algo-title.optimized { color: #6ee7b7; }
-  .algo-complexity {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
+  .algo-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -.2px;
   }
+  .algo-title.baseline { color: #b45309; }
+  .algo-title.optimized { color: #047857; }
+
+  .algo-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: #f3f4f6;
+    color: #374151;
+    border: 1.5px solid #d1d5db;
+  }
+
   canvas {
     width: 100%;
-    height: 380px;
-    background: rgba(15, 23, 42, 0.8);
+    height: 480px;
+    background: #ffffff;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 2px solid #94a3b8;
     display: block;
   }
+
+  /* ── Progress ────────────────────────────────────────── */
+  .progress-bar {
+    width: 100%;
+    height: 3px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width .1s;
+  }
+
+  /* ── Stats ───────────────────────────────────────────── */
   .stats {
     margin-top: 10px;
     display: grid;
@@ -131,200 +186,191 @@
     gap: 8px;
   }
   .stat {
-    background: rgba(255, 255, 255, 0.04);
-    padding: 8px 10px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-left: 3px solid var(--accent);
+    padding: 7px 10px;
     border-radius: 6px;
-    border-left: 2px solid #a78bfa;
   }
+  .stat.result-stat { border-left-color: var(--danger); }
   .stat-label {
     font-size: 10px;
-    color: #94a3b8;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: .7px;
+    color: var(--text-muted);
   }
   .stat-value {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: #f1f5f9;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
     margin-top: 2px;
   }
-  .progress-bar {
-    width: 100%;
-    height: 4px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 2px;
-    margin-top: 6px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #818cf8, #a78bfa);
-    border-radius: 2px;
-    transition: width 0.1s;
-  }
-  .tree-selector {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-  .tree-selector label {
-    font-size: 13px;
-    color: #f1f5f9;
-    cursor: pointer;
-    padding: 4px 12px;
-    border-radius: 6px;
-    transition: all 0.2s;
-    background: rgba(255,255,255,0.04);
-  }
-  .tree-selector label:hover { background: rgba(255,255,255,0.08); }
-  .tree-selector label:has(input:checked) {
-    background: rgba(129, 140, 248, 0.2);
-    border: 1px solid rgba(129, 140, 248, 0.4);
-  }
-  .record-status {
-    font-size: 12px;
-    color: #94a3b8;
-    padding: 4px 12px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.05);
-    min-width: 150px;
-    text-align: center;
-  }
-  .record-status.active { 
-    color: #f87171; 
-    background: rgba(248, 113, 113, 0.15);
-    animation: blink 0.5s infinite;
-  }
-  .record-status.done { 
-    color: #4ade80; 
-    background: rgba(74, 222, 128, 0.15);
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-  .downloads {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-  .download-btn {
-    font-size: 11px;
-    padding: 4px 10px;
-    background: rgba(255,255,255,0.06);
-  }
-  .download-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
-  .download-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .recording-badge {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background: #f87171;
-    border-radius: 50%;
-    margin-right: 6px;
-    animation: blink 0.5s infinite;
-  }
+
   @media (max-width: 900px) {
     .algorithms { grid-template-columns: 1fr; }
     .controls { flex-direction: column; align-items: stretch; }
+    .divider { display: none; }
   }
 </style>
 </head>
 <body>
 
-<h1>🌳 Анимация алгоритмов burst-сети</h1>
-<div class="subtitle">Сравнение базового O(k·n) и оптимизированного O(n log n) алгоритмов вычисления величины всплеска</div>
 
 <div class="controls">
   <div class="control-group">
-    <label>Размер N:</label>
+    <label>Размер N</label>
     <input type="range" id="nSlider" min="8" max="24" value="12" step="2">
     <span class="value-display" id="nValue">12</span>
   </div>
-  <div class="control-group tree-selector">
-    <label>
-      <input type="radio" name="treeType" value="comb" checked>
-      <span>Гребёнка</span>
-    </label>
-    <label>
-      <input type="radio" name="treeType" value="balanced">
-      <span>Сбалансированное</span>
-    </label>
-  </div>
+
+  <div class="divider"></div>
+
   <div class="control-group">
-    <label>Скорость:</label>
+    <label>Структура</label>
+    <div class="radio-group">
+      <label class="radio-pill"><input type="radio" name="treeType" value="comb" checked>Гребёнка</label>
+      <label class="radio-pill"><input type="radio" name="treeType" value="balanced">Сбалансированное</label>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="control-group">
+    <label>Скорость</label>
     <input type="range" id="speedSlider" min="50" max="800" value="300" step="50">
     <span class="value-display" id="speedValue">300ms</span>
   </div>
-  <button id="startBtn">▶ Запустить</button>
-  <button id="resetBtn" class="secondary">↻ Сбросить</button>
-  <button id="stepBtn" class="secondary">⏭ Шаг</button>
-  <button id="recordBtn" class="record">🔴 Записать WebM</button>
-  <span id="recordStatus" class="record-status">⏸ Готов</span>
+
+  <div class="divider"></div>
+
+  <button class="btn-primary" id="startBtn">Запустить</button>
+  <button class="btn-secondary" id="resetBtn">Сбросить</button>
+  <button class="btn-secondary" id="stepBtn">Шаг</button>
+
+
 </div>
 
 <div class="algorithms">
+  <!-- Baseline -->
   <div class="algo-panel">
     <div class="algo-header">
       <div class="algo-title baseline">Базовый алгоритм</div>
-      <div class="algo-complexity">O(k · n)</div>
+      <div class="algo-badge">O(k · n)</div>
     </div>
     <canvas id="baselineCanvas"></canvas>
     <div class="progress-bar"><div class="progress-fill" id="baselineProgress" style="width:0%"></div></div>
     <div class="stats">
-      <div class="stat"><div class="stat-label">Итерация</div><div class="stat-value" id="baselineIter">—</div></div>
-      <div class="stat"><div class="stat-label">Операций</div><div class="stat-value" id="baselineOps">0</div></div>
-      <div class="stat" style="border-left-color:#fb7185"><div class="stat-label">Σ F^(d)_max</div><div class="stat-value" id="baselineResult">—</div></div>
+      <div class="stat">
+        <div class="stat-label">Итерация</div>
+        <div class="stat-value" id="baselineIter">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Операций</div>
+        <div class="stat-value" id="baselineOps">0</div>
+      </div>
+      <div class="stat result-stat">
+        <div class="stat-label">Sum F^(d)_max</div>
+        <div class="stat-value" id="baselineResult">—</div>
+      </div>
     </div>
   </div>
 
+  <!-- Optimized -->
   <div class="algo-panel">
     <div class="algo-header">
       <div class="algo-title optimized">Оптимизированный</div>
-      <div class="algo-complexity">O(n log n)</div>
+      <div class="algo-badge">O(n log n)</div>
     </div>
     <canvas id="optimizedCanvas"></canvas>
     <div class="progress-bar"><div class="progress-fill" id="optimizedProgress" style="width:0%"></div></div>
     <div class="stats">
-      <div class="stat"><div class="stat-label">Узел u</div><div class="stat-value" id="optimizedNode">—</div></div>
-      <div class="stat"><div class="stat-label">Переносов</div><div class="stat-value" id="optimizedMoves">0</div></div>
-      <div class="stat" style="border-left-color:#fb7185"><div class="stat-label">Σ M[1]</div><div class="stat-value" id="optimizedResult">—</div></div>
+      <div class="stat">
+        <div class="stat-label">Узел u</div>
+        <div class="stat-value" id="optimizedNode">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Переносов</div>
+        <div class="stat-value" id="optimizedMoves">0</div>
+      </div>
+      <div class="stat result-stat">
+        <div class="stat-label">Sum M[1]</div>
+        <div class="stat-value" id="optimizedResult">—</div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="controls" style="margin-top: -8px; padding: 10px 18px;">
-  <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%;">
-    <span style="font-size: 12px; color: #94a3b8;">📥 Скачать WebM:</span>
-    <button class="download-btn" id="downloadCombBaseline" disabled>Гребёнка · Базовый</button>
-    <button class="download-btn" id="downloadCombOptimized" disabled>Гребёнка · Оптимиз.</button>
-    <button class="download-btn" id="downloadBalancedBaseline" disabled>Сбаланс. · Базовый</button>
-    <button class="download-btn" id="downloadBalancedOptimized" disabled>Сбаланс. · Оптимиз.</button>
-  </div>
-</div>
 
 <script>
 // =====================================================================
-// 1. ГЕНЕРАЦИЯ ДЕРЕВЬЕВ
+// CANVAS COLOUR TOKENS — light theme, high contrast
 // =====================================================================
+const C = {
+  edgeDefault:    '#1e293b',   // near-black — maximum contrast on white
+  edgeActive:     '#dc2626',   // red-600
+  edgeVmax:       '#7c3aed',   // violet-700
+  edgeWeight:     '#ffffff',   // white text on dark pill
+  edgeWeightAct:  '#ffffff',
+  nodeLeaf:       '#16a34a',   // green-600
+  nodeInner:      '#1d4ed8',   // blue-700
+  nodeActive:     '#ea580c',   // orange-600
+  nodeProcessed:  '#7c3aed',   // violet-700
+  nodeInfinity:   '#0284c7',   // sky-600
+  nodeVmax:       '#7c3aed',
+  nodeBorder:     '#ffffff',
+  nodeLabelNum:   '#0f172a',
+  nodeLabelVal:   '#b45309',   // amber-800
+  nodeLabelVal2:  '#047857',   // emerald-700
+  overlayBL:      '#92400e',
+  overlayOpt:     '#065f46',
+  canvasBg:       '#ffffff',
+};
 
+// =====================================================================
+// 1. TREE GENERATORS
+// =====================================================================
 function generateCombTree(n) {
   if (n < 4) n = 4;
-  const tree = { n, children: Array.from({length: n + 1}, () => []), cap: Array.from({length: n + 1}, () => []), incomingCap: new Array(n + 1).fill(0), depth: new Array(n + 1).fill(0), parent: new Array(n + 1).fill(0) };
-  function addEdge(u, v, c) { tree.children[u].push(v); tree.cap[u].push(c); tree.incomingCap[v] = c; tree.parent[v] = u; }
+  const tree = {
+    n,
+    children: Array.from({length: n + 1}, () => []),
+    cap: Array.from({length: n + 1}, () => []),
+    incomingCap: new Array(n + 1).fill(0),
+    depth: new Array(n + 1).fill(0),
+    parent: new Array(n + 1).fill(0)
+  };
+  const addEdge = (u, v, c) => {
+    tree.children[u].push(v); tree.cap[u].push(c);
+    tree.incomingCap[v] = c; tree.parent[v] = u;
+  };
   const spineLen = Math.floor(n / 2);
   for (let i = 1; i < spineLen; ++i) addEdge(i, i + 1, 10.0);
-  for (let i = 1; i <= spineLen; ++i) { const leafId = spineLen + i; if (leafId <= n) addEdge(i, leafId, 100.0); }
+  for (let i = 1; i <= spineLen; ++i) {
+    const leafId = spineLen + i;
+    if (leafId <= n) addEdge(i, leafId, 100.0);
+  }
   for (let i = 2 * spineLen + 1; i <= n; ++i) addEdge(1, i, 100.0);
   return tree;
 }
 
 function generateBalancedTree(n) {
   if (n < 4) n = 4;
-  const tree = { n, children: Array.from({length: n + 1}, () => []), cap: Array.from({length: n + 1}, () => []), incomingCap: new Array(n + 1).fill(0), depth: new Array(n + 1).fill(0), parent: new Array(n + 1).fill(0) };
-  function addEdge(u, v, c) { tree.children[u].push(v); tree.cap[u].push(c); tree.incomingCap[v] = c; tree.parent[v] = u; }
-  let nextId = 2; const queue = [1];
+  const tree = {
+    n,
+    children: Array.from({length: n + 1}, () => []),
+    cap: Array.from({length: n + 1}, () => []),
+    incomingCap: new Array(n + 1).fill(0),
+    depth: new Array(n + 1).fill(0),
+    parent: new Array(n + 1).fill(0)
+  };
+  const addEdge = (u, v, c) => {
+    tree.children[u].push(v); tree.cap[u].push(c);
+    tree.incomingCap[v] = c; tree.parent[v] = u;
+  };
+  let nextId = 2;
+  const queue = [1];
   while (queue.length > 0 && nextId <= n) {
     const u = queue.shift();
     if (nextId <= n) { addEdge(u, nextId, 10.0); queue.push(nextId); nextId++; }
@@ -335,7 +381,10 @@ function generateBalancedTree(n) {
 
 function calculateDepths(tree) {
   const q = [1]; tree.depth[1] = 0;
-  while (q.length) { const u = q.shift(); for (const v of tree.children[u]) { tree.depth[v] = tree.depth[u] + 1; q.push(v); } }
+  while (q.length) {
+    const u = q.shift();
+    for (const v of tree.children[u]) { tree.depth[v] = tree.depth[u] + 1; q.push(v); }
+  }
 }
 
 function getBottomUpOrder(tree) {
@@ -345,9 +394,8 @@ function getBottomUpOrder(tree) {
 }
 
 // =====================================================================
-// 2. АНИМАТОР (сокращённый, только ключевые методы)
+// 2. ANIMATOR
 // =====================================================================
-
 class AlgorithmAnimator {
   constructor(canvas, type) {
     this.canvas = canvas;
@@ -361,7 +409,7 @@ class AlgorithmAnimator {
     this.depthStartCount = 0;
     this.totalSteps = 0;
   }
-  
+
   resize() {
     const rect = this.canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
@@ -372,7 +420,7 @@ class AlgorithmAnimator {
     this.canvasW = rect.width;
     this.canvasH = rect.height;
   }
-  
+
   init(tree) {
     this.tree = JSON.parse(JSON.stringify(tree));
     calculateDepths(this.tree);
@@ -399,22 +447,23 @@ class AlgorithmAnimator {
       vmaxInfo: null
     };
   }
-  
+
   computeLayout() {
     const tree = this.tree;
     const positions = new Array(tree.n + 1).fill(null);
     const subtreeLeaves = new Array(tree.n + 1).fill(0);
     const countLeaves = (u) => {
       if (tree.children[u].length === 0) { subtreeLeaves[u] = 1; return 1; }
-      let s = 0; for (const v of tree.children[u]) s += countLeaves(v);
+      let s = 0;
+      for (const v of tree.children[u]) s += countLeaves(v);
       subtreeLeaves[u] = s; return s;
     };
     countLeaves(1);
     let maxDepth = 0;
     for (let u = 1; u <= tree.n; ++u) if (tree.depth[u] > maxDepth) maxDepth = tree.depth[u];
-    const W = this.canvasW, H = this.canvasH, padX = 30, padY = 30;
+    const W = this.canvasW, H = this.canvasH, padX = 48, padYT = 50, padYB = 36;
     const assign = (u, left, right, depth) => {
-      const y = padY + (maxDepth > 0 ? (depth / maxDepth) * (H - 2 * padY) : 0);
+      const y = padYT + (maxDepth > 0 ? (depth / maxDepth) * (H - padYT - padYB) : 0);
       const x = (left + right) / 2;
       positions[u] = {x, y};
       if (tree.children[u].length === 0) return;
@@ -429,13 +478,13 @@ class AlgorithmAnimator {
     assign(1, padX, W - padX, 0);
     return positions;
   }
-  
+
   buildSteps() {
     this.steps = [];
     if (this.type === 'baseline') this.buildBaselineSteps();
     else this.buildOptimizedSteps();
   }
-  
+
   buildBaselineSteps() {
     const tree = this.tree;
     const order = getBottomUpOrder(tree);
@@ -459,7 +508,7 @@ class AlgorithmAnimator {
     }
     this.steps.push({type: 'done'});
   }
-  
+
   buildOptimizedSteps() {
     const tree = this.tree;
     const order = getBottomUpOrder(tree);
@@ -479,24 +528,43 @@ class AlgorithmAnimator {
     }
     this.steps.push({type: 'done'});
   }
-  
+
   executeStep() {
     if (this.currentStep >= this.steps.length) return null;
     const step = this.steps[this.currentStep];
     this.currentStep++;
     const s = this.state;
     s.activeEdges = [];
-    switch(step.type) {
+    switch (step.type) {
       case 'init': s.activeNode = null; break;
-      case 'depth-start': s.currentDepth = step.depth; s.iterCount = step.iterNum; s.activeNode = null; s.processedNodes.clear(); s.dp.fill(0); s.infinityLeaves.clear(); s.currentFmax = null; break;
-      case 'depth-end': s.activeNode = null; s.currentFmax = s.dp[1]; s.totalSum += s.dp[1]; break;
+      case 'depth-start':
+        s.currentDepth = step.depth;
+        s.iterCount = step.iterNum;
+        s.activeNode = null;
+        s.processedNodes.clear();
+        s.dp.fill(0);
+        s.infinityLeaves.clear();
+        s.currentFmax = null;
+        break;
+      case 'depth-end':
+        s.activeNode = null;
+        s.currentFmax = s.dp[1];
+        s.totalSum += s.dp[1];
+        break;
       case 'process-leaf':
-        s.activeNode = step.node; s.processedNodes.add(step.node);
-        if (this.type === 'baseline') { s.dp[step.node] = step.value; if (step.isInfinity) s.infinityLeaves.add(step.node); }
-        else { const m = new Map(); m.set(step.depth, Infinity); s.M[step.node] = m; }
-        s.opsCount++; break;
+        s.activeNode = step.node;
+        s.processedNodes.add(step.node);
+        if (this.type === 'baseline') {
+          s.dp[step.node] = step.value;
+          if (step.isInfinity) s.infinityLeaves.add(step.node);
+        } else {
+          const m = new Map(); m.set(step.depth, Infinity); s.M[step.node] = m;
+        }
+        s.opsCount++;
+        break;
       case 'process-node':
-        s.activeNode = step.node; s.processedNodes.add(step.node);
+        s.activeNode = step.node;
+        s.processedNodes.add(step.node);
         if (this.type === 'baseline') {
           let total = 0;
           for (let i = 0; i < this.tree.children[step.node].length; ++i) {
@@ -508,7 +576,8 @@ class AlgorithmAnimator {
           const moves = this.performMerge(step.node);
           s.moveCount += moves;
         }
-        s.opsCount++; break;
+        s.opsCount++;
+        break;
       case 'find-largest':
         s.activeNode = step.node;
         const vmax = this.findVMax(step.node);
@@ -524,14 +593,14 @@ class AlgorithmAnimator {
         s.activeNode = null;
         if (this.type === 'optimized') {
           let sum = 0;
-          if (s.M[1]) { for (const v of s.M[1].values()) sum += v; }
+          if (s.M[1]) for (const v of s.M[1].values()) sum += v;
           s.finalSum = sum;
         }
         break;
     }
     return step;
   }
-  
+
   findVMax(u) {
     const tree = this.tree, s = this.state;
     let bestI = 0, bestSize = 0;
@@ -542,7 +611,7 @@ class AlgorithmAnimator {
     }
     return tree.children[u][bestI];
   }
-  
+
   performMerge(u) {
     const tree = this.tree, s = this.state;
     if (tree.children[u].length === 0) return 0;
@@ -554,7 +623,7 @@ class AlgorithmAnimator {
     }
     const vmax = tree.children[u][bestI], cvmax = tree.cap[u][bestI];
     const newM = new Map();
-    if (s.M[vmax]) { for (const [d, val] of s.M[vmax]) newM.set(d, Math.min(cvmax, val)); }
+    if (s.M[vmax]) for (const [d, val] of s.M[vmax]) newM.set(d, Math.min(cvmax, val));
     let moves = 0;
     for (let i = 0; i < tree.children[u].length; ++i) {
       if (i === bestI) continue;
@@ -562,8 +631,7 @@ class AlgorithmAnimator {
       if (!s.M[v]) continue;
       for (const [d, val] of s.M[v]) {
         const term = Math.min(cv, val);
-        const cur = newM.get(d) || 0;
-        newM.set(d, cur + term);
+        newM.set(d, (newM.get(d) || 0) + term);
         moves++;
       }
       s.M[v] = new Map();
@@ -572,139 +640,347 @@ class AlgorithmAnimator {
     s.M[vmax] = new Map();
     return moves;
   }
-  
+
   draw() {
     const ctx = this.ctx, W = this.canvasW, H = this.canvasH;
     ctx.clearRect(0, 0, W, H);
     if (!this.tree || !this.positions) return;
+
+    // Pure white canvas — maximum contrast
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
     const tree = this.tree, s = this.state;
+
+    // ── Edges first (drawn under nodes) ───────────────────
     for (let u = 1; u <= tree.n; ++u) {
       for (let i = 0; i < tree.children[u].length; ++i) {
         const v = tree.children[u][i];
         const p1 = this.positions[u], p2 = this.positions[v];
         if (!p1 || !p2) continue;
-        const isActive = s.activeEdges.some(([a, b]) => a === u && b === v);
+
+        const isActive   = s.activeEdges.some(([a, b]) => a === u && b === v);
         const isVmaxEdge = s.vmaxNode === v && s.activeNode === u;
-        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
-        if (isActive) { ctx.strokeStyle = '#f472b6'; ctx.lineWidth = 3.5; }
-        else if (isVmaxEdge) { ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 3; ctx.setLineDash([4, 4]); }
-        else { ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)'; ctx.lineWidth = 1; ctx.setLineDash([]); }
-        ctx.stroke(); ctx.setLineDash([]);
+
+        ctx.setLineDash([]);
+
+        // Glow pass for highlighted edges (drawn first, blurred)
+        if (isActive || isVmaxEdge) {
+          ctx.save();
+          ctx.shadowColor = isActive ? '#dc2626' : '#7c3aed';
+          ctx.shadowBlur = 16;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = isActive ? '#dc2626' : '#7c3aed';
+          ctx.lineWidth = isActive ? 7 : 6;
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Main edge stroke
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+
+        if (isActive) {
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = 6;
+          ctx.setLineDash([]);
+        } else if (isVmaxEdge) {
+          ctx.strokeStyle = '#7c3aed';
+          ctx.lineWidth = 5;
+          ctx.setLineDash([10, 6]);
+        } else {
+          ctx.strokeStyle = '#1e293b';   // near-black — maximum contrast
+          ctx.lineWidth = 3;
+          ctx.setLineDash([]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // ── Edge weight label ─────────────────────────────
         const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
         const dx = p2.x - p1.x, dy = p2.y - p1.y;
         const len = Math.sqrt(dx * dx + dy * dy);
         let nx = -dy / len, ny = dx / len;
         if (ny > 0) { nx = -nx; ny = -ny; }
-        const offset = 12;
-        ctx.font = 'bold 10px JetBrains Mono';
-        ctx.fillStyle = isActive || isVmaxEdge ? '#fb7185' : 'rgba(203, 213, 225, 0.8)';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(tree.cap[u][i], mx + nx * offset, my + ny * offset);
+        const off = 18;
+        const lx = mx + nx * off, ly = my + ny * off;
+
+        ctx.font = 'bold 13px JetBrains Mono';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const wLabel = tree.cap[u][i].toString();
+        const tw = ctx.measureText(wLabel).width;
+        const pr = 6, ph = 11;  // pill padding
+
+        // Pill fill: coloured for active/vmax, dark for default
+        const pillFill   = isActive ? '#dc2626' : isVmaxEdge ? '#7c3aed' : '#1e293b';
+        const pillStroke = isActive ? '#7f1d1d' : isVmaxEdge ? '#4c1d95' : '#0f172a';
+
+        ctx.fillStyle = pillFill;
+        ctx.beginPath();
+        ctx.roundRect(lx - tw/2 - pr, ly - ph, tw + pr * 2, ph * 2, ph);
+        ctx.fill();
+        ctx.strokeStyle = pillStroke;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';   // always white text on dark pill
+        ctx.fillText(wLabel, lx, ly);
       }
     }
+
+    // ── Nodes ──────────────────────────────────────────────
     for (let u = 1; u <= tree.n; ++u) {
       const p = this.positions[u];
       if (!p) continue;
-      const isLeaf = tree.children[u].length === 0;
-      const isActive = s.activeNode === u;
+      const isLeaf      = tree.children[u].length === 0;
+      const isActive    = s.activeNode === u;
       const isProcessed = s.processedNodes.has(u);
-      const isInfinity = s.infinityLeaves.has(u);
-      const isVMax = s.vmaxNode === u;
-      let color = '#64748b';
-      let radius = isLeaf ? 7 : 9;
-      if (isActive) { color = '#fbbf24'; radius += 2; }
-      else if (isInfinity) { color = '#22d3ee'; }
-      else if (isVMax && isActive) { color = '#c084fc'; radius += 2; }
-      else if (isVMax) { color = '#c084fc'; }
-      else if (isProcessed) { color = '#a78bfa'; }
-      else if (isLeaf) { color = '#34d399'; }
-      ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-      ctx.fillStyle = color; ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.font = 'bold 11px JetBrains Mono'; ctx.fillStyle = '#f1f5f9';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(u, p.x, p.y - radius - 8);
+      const isInfinity  = s.infinityLeaves.has(u);
+      const isVMax      = s.vmaxNode === u;
+
+      // Presentation-scale radii
+      let radius = isLeaf ? 14 : 18;
+      if (isActive) radius += 5;
+      else if (isVMax) radius += 3;
+
+      let fillColor, ringColor;
+      if (isActive) {
+        fillColor = '#ea580c';   // orange
+        ringColor = '#7c2d12';
+      } else if (isInfinity) {
+        fillColor = '#0284c7';   // sky
+        ringColor = '#0c4a6e';
+      } else if (isVMax) {
+        fillColor = '#7c3aed';   // violet
+        ringColor = '#4c1d95';
+      } else if (isProcessed) {
+        fillColor = '#7c3aed';
+        ringColor = '#4c1d95';
+      } else if (isLeaf) {
+        fillColor = '#16a34a';   // green
+        ringColor = '#14532d';
+      } else {
+        fillColor = '#1d4ed8';   // blue
+        ringColor = '#1e3a8a';
+      }
+
+      // Glow for active / vmax
+      if (isActive || isVMax) {
+        ctx.save();
+        ctx.shadowColor = fillColor;
+        ctx.shadowBlur = 22;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Node fill
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = fillColor;
+      ctx.fill();
+
+      // White border + dark ring
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius + 3, 0, Math.PI * 2);
+      ctx.strokeStyle = ringColor;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // ── Node ID label (inside circle) ─────────────────
+      ctx.font = `bold ${radius > 17 ? 15 : 13}px JetBrains Mono`;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(u.toString(), p.x, p.y);
+
+      // ── Value label (below node) ───────────────────────
       let label = '';
       if (this.type === 'baseline') {
-        if (s.dp[u] !== 0 || isProcessed) label = s.dp[u] === Infinity ? '∞' : s.dp[u] !== 0 ? s.dp[u].toFixed(0) : '';
+        if (isProcessed || s.dp[u] !== 0) {
+          label = s.dp[u] === Infinity ? 'inf' : s.dp[u] !== 0 ? s.dp[u].toFixed(0) : '';
+        }
       } else {
         if (s.M[u] && s.M[u].size > 0) {
           const entries = [...s.M[u].entries()];
-          if (entries.length <= 3) label = entries.map(([d, v]) => `${d}:${v === Infinity ? '∞' : v.toFixed(0)}`).join(' ');
-          else label = `${entries.length} зап.`;
-          const sizeLabel = `|M|=${s.M[u].size}`;
-          ctx.font = '8px JetBrains Mono';         ctx.fillStyle = '#94a3b8';
-          ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
-          ctx.fillText(sizeLabel, p.x - 6, p.y - radius - 10);
+          label = entries.length <= 2
+            ? entries.map(([d, v]) => `${d}:${v === Infinity ? 'inf' : v.toFixed(0)}`).join(' ')
+            : `|M|=${s.M[u].size}`;
         }
       }
+
       if (label) {
-        ctx.font = '9px JetBrains Mono'; ctx.fillStyle = '#fcd34d';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        ctx.fillText(label, p.x, p.y + radius + 3);
+        const labelY = p.y + radius + 7;
+        ctx.font = 'bold 12px JetBrains Mono';
+        const lw = ctx.measureText(label).width;
+        // Background chip
+        ctx.fillStyle = this.type === 'baseline' ? '#fef3c7' : '#d1fae5';
+        ctx.strokeStyle = this.type === 'baseline' ? '#d97706' : '#059669';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(p.x - lw/2 - 5, labelY - 1, lw + 10, 16, 4);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = this.type === 'baseline' ? '#92400e' : '#065f46';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(label, p.x, labelY);
       }
     }
+
+    // ── Overlay info badge (top-left) ─────────────────────
+    const pad = 12;
     if (this.type === 'baseline' && s.currentDepth !== null) {
-      ctx.font = 'bold 13px JetBrains Mono'; ctx.fillStyle = '#fcd34d';
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      ctx.fillText(`Итерация ${s.iterCount}/${this.depthStartCount} | d=${s.currentDepth}`, 10, 10);
+      const text = `iter ${s.iterCount}/${this.depthStartCount}   d = ${s.currentDepth}`;
+      ctx.font = 'bold 15px JetBrains Mono';
+      const tw = ctx.measureText(text).width;
+      ctx.fillStyle = '#fef3c7';
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(pad, pad, tw + 24, 32, 7);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#92400e';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, pad + 12, pad + 16);
+
     } else if (this.type === 'optimized' && s.activeNode !== null) {
-      ctx.font = 'bold 13px JetBrains Mono'; ctx.fillStyle = '#6ee7b7';
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      const info = s.vmaxNode ? `v_max=${s.vmaxNode} (|M|=${s.vmaxInfo?.size || '?'})` : '';
-      ctx.fillText(`u=${s.activeNode} ${info}`, 10, 10);
+      const info = s.vmaxNode ? `u = ${s.activeNode}   vmax = ${s.vmaxNode}` : `u = ${s.activeNode}`;
+      ctx.font = 'bold 15px JetBrains Mono';
+      const tw = ctx.measureText(info).width;
+      ctx.fillStyle = '#d1fae5';
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(pad, pad, tw + 24, 32, 7);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#065f46';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(info, pad + 12, pad + 16);
     }
+
+    // Legend (bottom-right)
+    this.drawLegend(W, H);
   }
-  
+
+  drawLegend(W, H) {
+    const items = this.type === 'baseline'
+      ? [
+          {color: '#16a34a', label: 'Лист'},
+          {color: '#1d4ed8', label: 'Внутренний'},
+          {color: '#ea580c', label: 'Активный'},
+          {color: '#0284c7', label: 'inf-лист'},
+          {color: '#7c3aed', label: 'Обработан'},
+        ]
+      : [
+          {color: '#16a34a', label: 'Лист'},
+          {color: '#1d4ed8', label: 'Внутренний'},
+          {color: '#ea580c', label: 'Активный'},
+          {color: '#7c3aed', label: 'v_max'},
+          {color: '#7c3aed', label: 'Обработан'},
+        ];
+
+    const cx = this.ctx;
+    const itemH = 22, padX = 10, padY = 8, dotR = 7;
+    const colW = 110;
+    const totalH = items.length * itemH + padY * 2;
+    const bx = W - colW - padX * 2 - 8;
+    const by = H - totalH - 8;
+
+    // Panel
+    cx.fillStyle = 'rgba(255,255,255,0.95)';
+    cx.strokeStyle = '#94a3b8';
+    cx.lineWidth = 1.5;
+    cx.beginPath();
+    cx.roundRect(bx - padX, by - padY, colW + padX * 2, totalH, 8);
+    cx.fill();
+    cx.stroke();
+
+    items.forEach((item, idx) => {
+      const iy = by + idx * itemH + itemH / 2;
+
+      // Dot
+      cx.beginPath();
+      cx.arc(bx + dotR, iy, dotR, 0, Math.PI * 2);
+      cx.fillStyle = item.color;
+      cx.fill();
+      cx.strokeStyle = '#ffffff';
+      cx.lineWidth = 2;
+      cx.stroke();
+      cx.beginPath();
+      cx.arc(bx + dotR, iy, dotR + 1.5, 0, Math.PI * 2);
+      cx.strokeStyle = item.color + 'aa';
+      cx.lineWidth = 1;
+      cx.stroke();
+
+      // Label
+      cx.font = 'bold 12px Inter';
+      cx.fillStyle = '#1e293b';
+      cx.textAlign = 'left';
+      cx.textBaseline = 'middle';
+      cx.fillText(item.label, bx + dotR * 2 + 8, iy);
+    });
+  }
+
   getProgress() { return this.currentStep / Math.max(1, this.totalSteps); }
+
   getStats() {
     const s = this.state;
-    return { opsCount: s.opsCount, moveCount: s.moveCount, totalSum: s.totalSum, finalSum: s.finalSum, iterCount: s.iterCount, depthStartCount: this.depthStartCount, currentDepth: s.currentDepth };
+    return {
+      opsCount: s.opsCount,
+      moveCount: s.moveCount,
+      totalSum: s.totalSum,
+      finalSum: s.finalSum,
+      iterCount: s.iterCount,
+      depthStartCount: this.depthStartCount,
+      currentDepth: s.currentDepth
+    };
   }
 }
 
 // =====================================================================
-// 3. ГЛАВНАЯ ЛОГИКА
+// 3. MAIN LOGIC
 // =====================================================================
-
-const baselineCanvas = document.getElementById('baselineCanvas');
+const baselineCanvas  = document.getElementById('baselineCanvas');
 const optimizedCanvas = document.getElementById('optimizedCanvas');
+const baselineAnim    = new AlgorithmAnimator(baselineCanvas, 'baseline');
+const optimizedAnim   = new AlgorithmAnimator(optimizedCanvas, 'optimized');
 
-const baselineAnim = new AlgorithmAnimator(baselineCanvas, 'baseline');
-const optimizedAnim = new AlgorithmAnimator(optimizedCanvas, 'optimized');
+const nSlider      = document.getElementById('nSlider');
+const nValue       = document.getElementById('nValue');
+const speedSlider  = document.getElementById('speedSlider');
+const speedValue   = document.getElementById('speedValue');
+const startBtn     = document.getElementById('startBtn');
+const resetBtn     = document.getElementById('resetBtn');
+const stepBtn      = document.getElementById('stepBtn');
 
-const nSlider = document.getElementById('nSlider');
-const nValue = document.getElementById('nValue');
-const speedSlider = document.getElementById('speedSlider');
-const speedValue = document.getElementById('speedValue');
-const startBtn = document.getElementById('startBtn');
-const resetBtn = document.getElementById('resetBtn');
-const stepBtn = document.getElementById('stepBtn');
-const recordBtn = document.getElementById('recordBtn');
-const recordStatus = document.getElementById('recordStatus');
+let currentN = 12, currentTreeType = 'comb', speed = 300;
+let running = false, animationTimer = null;
 
-let currentN = 12;
-let currentTreeType = 'comb';
-let speed = 300;
-let running = false;
-let animationTimer = null;
-let isRecording = false;
-let isProcessing = false;
-let recordedFrames = { baseline: [], optimized: [] };
-let videoUrls = { baseline: null, optimized: null };
-let frameCaptureInterval = null;
-
-function fmtNum(x) {
+const fmtNum = x => {
   if (x === null || x === undefined) return '—';
-  if (x === Infinity) return '∞';
+  if (x === Infinity) return 'inf';
   if (!isFinite(x)) return '—';
   if (Number.isInteger(x)) return x.toString();
   return x.toFixed(1);
-}
+};
 
 function generateTree(n, type) {
-  if (type === 'balanced') return generateBalancedTree(n);
-  return generateCombTree(n);
+  return type === 'balanced' ? generateBalancedTree(n) : generateCombTree(n);
 }
 
 function initTree() {
@@ -716,477 +992,108 @@ function initTree() {
   optimizedAnim.draw();
   updateStats();
   updateProgress();
-  document.querySelectorAll('.download-btn').forEach(b => { b.disabled = true; });
 }
 
 function updateStats() {
   const bs = baselineAnim.getStats();
-  const os = optimizedAnim.getStats();
-  document.getElementById('baselineIter').textContent = bs.iterCount > 0 ? `${bs.iterCount}/${bs.depthStartCount}` : '—';
-  document.getElementById('baselineOps').textContent = bs.opsCount;
+  document.getElementById('baselineIter').textContent   = bs.iterCount > 0 ? `${bs.iterCount}/${bs.depthStartCount}` : '—';
+  document.getElementById('baselineOps').textContent    = bs.opsCount;
   document.getElementById('baselineResult').textContent = fmtNum(bs.totalSum);
-  document.getElementById('optimizedNode').textContent = optimizedAnim.state.activeNode !== null ? `u=${optimizedAnim.state.activeNode}` : '—';
+
+  const os = optimizedAnim.getStats();
+  document.getElementById('optimizedNode').textContent  = optimizedAnim.state.activeNode !== null ? `u=${optimizedAnim.state.activeNode}` : '—';
   document.getElementById('optimizedMoves').textContent = os.moveCount;
-  if (os.finalSum !== null) document.getElementById('optimizedResult').textContent = fmtNum(os.finalSum);
-  else if (optimizedAnim.state.M[1] && optimizedAnim.state.M[1].size > 0) {
-    let sum = 0; for (const v of optimizedAnim.state.M[1].values()) sum += v;
+  if (os.finalSum !== null) {
+    document.getElementById('optimizedResult').textContent = fmtNum(os.finalSum);
+  } else if (optimizedAnim.state.M[1] && optimizedAnim.state.M[1].size > 0) {
+    let sum = 0;
+    for (const v of optimizedAnim.state.M[1].values()) sum += v;
     document.getElementById('optimizedResult').textContent = fmtNum(sum);
-  } else document.getElementById('optimizedResult').textContent = '—';
+  } else {
+    document.getElementById('optimizedResult').textContent = '—';
+  }
 }
 
 function updateProgress() {
-  document.getElementById('baselineProgress').style.width = (baselineAnim.getProgress() * 100) + '%';
+  document.getElementById('baselineProgress').style.width  = (baselineAnim.getProgress() * 100)  + '%';
   document.getElementById('optimizedProgress').style.width = (optimizedAnim.getProgress() * 100) + '%';
 }
 
-// =====================================================================
-// ОСНОВНОЙ ЦИКЛ АНИМАЦИИ — ПРОСТОЙ И НАДЁЖНЫЙ
-// =====================================================================
-
+// ── Animation loop ──────────────────────────────────────────────────
 function animationTick() {
-  // Выполняем один шаг анимации
   baselineAnim.executeStep();
   optimizedAnim.executeStep();
   baselineAnim.draw();
   optimizedAnim.draw();
-  
   updateStats();
   updateProgress();
-  
-  const done = baselineAnim.currentStep >= baselineAnim.steps.length && 
+
+  const done = baselineAnim.currentStep  >= baselineAnim.steps.length &&
                optimizedAnim.currentStep >= optimizedAnim.steps.length;
-  
+
   if (done) {
-    if (isRecording) {
-      // Останавливаем захват кадров
-      if (frameCaptureInterval) {
-        clearInterval(frameCaptureInterval);
-        frameCaptureInterval = null;
-      }
-      finishRecording();
-    }
     if (running) {
       running = false;
       startBtn.disabled = false;
-      startBtn.textContent = '▶ Запустить';
+      startBtn.textContent = 'Запустить';
     }
     return;
   }
-  
-  // Продолжаем анимацию с фиксированной задержкой
-  if (running) {
-    animationTimer = setTimeout(animationTick, speed);
-  }
+  if (running) animationTimer = setTimeout(animationTick, speed);
 }
 
-// Отдельный таймер для захвата кадров во время записи
-function startFrameCapture() {
-  if (frameCaptureInterval) clearInterval(frameCaptureInterval);
-  
-  // Захватываем кадры каждые 50ms (20 FPS) — этого достаточно для анимации
-  frameCaptureInterval = setInterval(() => {
-    if (isRecording && running) {
-      recordedFrames.baseline.push(baselineCanvas.toDataURL('image/png'));
-      recordedFrames.optimized.push(optimizedCanvas.toDataURL('image/png'));
-      recordStatus.textContent = `🔴 Кадров: ${recordedFrames.baseline.length}`;
-    }
-  }, 50);
-}
 
 function start() {
   if (running) return;
   running = true;
   startBtn.disabled = true;
-  startBtn.textContent = '⏸ Выполняется...';
-  
-  // Если идёт запись, запускаем захват кадров
-  if (isRecording) {
-    startFrameCapture();
-  }
-  
+  startBtn.textContent = 'Выполняется...';
   animationTimer = setTimeout(animationTick, 10);
 }
 
 function stop() {
   running = false;
-  if (animationTimer) {
-    clearTimeout(animationTimer);
-    animationTimer = null;
-  }
-  if (frameCaptureInterval) {
-    clearInterval(frameCaptureInterval);
-    frameCaptureInterval = null;
-  }
+  if (animationTimer) { clearTimeout(animationTimer); animationTimer = null; }
   startBtn.disabled = false;
-  startBtn.textContent = '▶ Запустить';
+  startBtn.textContent = 'Запустить';
 }
 
 function reset() {
   stop();
-  if (isRecording) {
-    isRecording = false;
-    recordedFrames = { baseline: [], optimized: [] };
-    recordBtn.textContent = '🔴 Записать WebM';
-    recordBtn.className = 'record';
-    recordStatus.textContent = '⏸ Запись прервана';
-    recordStatus.className = 'record-status';
-  }
-  if (isProcessing) {
-    isProcessing = false;
-  }
-  Object.keys(videoUrls).forEach(key => {
-    if (videoUrls[key]) { URL.revokeObjectURL(videoUrls[key]); videoUrls[key] = null; }
-  });
   initTree();
   updateProgress();
 }
 
-// =====================================================================
-// ЗАПИСЬ
-// =====================================================================
 
-function startRecording() {
-  if (isRecording || isProcessing) return;
-  
-  reset();
-  initTree();
-  
-  isRecording = true;
-  recordedFrames = { baseline: [], optimized: [] };
-  
-  recordBtn.textContent = '⏹ Остановить запись';
-  recordBtn.className = 'record recording';
-  recordStatus.textContent = '🔴 Запись... (0 кадров)';
-  recordStatus.className = 'record-status active';
-  
-  start();
-}
+// ── Event handlers ──────────────────────────────────────────────────
+nSlider.addEventListener('input', e => { currentN = parseInt(e.target.value); nValue.textContent = currentN; });
+nSlider.addEventListener('change', () => { if (!running) reset(); });
 
-function finishRecording() {
-  isRecording = false;
-  if (frameCaptureInterval) {
-    clearInterval(frameCaptureInterval);
-    frameCaptureInterval = null;
-  }
-  
-  recordBtn.textContent = '⏳ Создание видео...';
-  recordBtn.className = 'record';
-  recordStatus.textContent = '⏳ Создание WebM...';
-  recordStatus.className = 'record-status';
-  
-  isProcessing = true;
-  
-  // Захватываем последний кадр, если его нет
-  if (recordedFrames.baseline.length === 0) {
-    recordedFrames.baseline.push(baselineCanvas.toDataURL('image/png'));
-    recordedFrames.optimized.push(optimizedCanvas.toDataURL('image/png'));
-  }
-  
-  Promise.all([
-    createVideoFromFrames(recordedFrames.baseline, 'baseline'),
-    createVideoFromFrames(recordedFrames.optimized, 'optimized')
-  ]).then(() => {
-    isProcessing = false;
-    recordBtn.textContent = '✅ Готово!';
-    recordBtn.className = 'record done';
-    recordStatus.textContent = '✅ Видео готовы! Скачайте ниже';
-    recordStatus.className = 'record-status done';
-    
-    const treeName = currentTreeType === 'comb' ? 'comb' : 'balanced';
-    ['baseline', 'optimized'].forEach(type => {
-      const key = treeName + type.charAt(0).toUpperCase() + type.slice(1);
-      const btn = document.getElementById('download' + key.charAt(0).toUpperCase() + key.slice(1));
-      if (btn && videoUrls[type]) {
-        btn.disabled = false;
-        const label = treeName === 'comb' ? 'Гребёнка' : 'Сбаланс.';
-        const algo = type === 'baseline' ? 'Базовый' : 'Оптимиз.';
-        btn.textContent = `⬇ ${label} · ${algo}`;
-      }
-    });
-  }).catch((err) => {
-    console.error('Ошибка создания видео:', err);
-    isProcessing = false;
-    recordBtn.textContent = '❌ Ошибка';
-    recordBtn.className = 'record';
-    recordStatus.textContent = '❌ Ошибка создания видео';
-    recordStatus.className = 'record-status';
-  });
-}
-
-function createVideoFromFrames(frames, type) {
-  return new Promise((resolve, reject) => {
-    if (frames.length === 0) {
-      console.warn(`Нет кадров для ${type}`);
-      videoUrls[type] = null;
-      resolve();
-      return;
-    }
-    
-    console.log(`Создание видео для ${type}, кадров: ${frames.length}`);
-    
-    const img = new Image();
-    img.onload = function() {
-      const videoCanvas = document.createElement('canvas');
-      videoCanvas.width = img.width;
-      videoCanvas.height = img.height;
-      const ctx = videoCanvas.getContext('2d');
-      
-      const mimeType = getSupportedMimeType();
-      if (!mimeType) {
-        reject(new Error('Браузер не поддерживает запись видео'));
-        return;
-      }
-      
-      const chunks = [];
-      const stream = videoCanvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, {
-        mimeType: mimeType,
-        videoBitsPerSecond: 2000000
-      });
-      
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          chunks.push(e.data);
-        }
-      };
-      
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
-        console.log(`[${type}] Видео создано: ${blob.size} байт`);
-        
-        if (blob.size > 0) {
-          const url = URL.createObjectURL(blob);
-          videoUrls[type] = url;
-          resolve();
-        } else {
-          reject(new Error(`Видео для ${type} пустое`));
-        }
-      };
-      
-      recorder.onerror = (e) => {
-        reject(e);
-      };
-      
-      recorder.start(100);
-      
-      let frameIndex = 0;
-      const drawFrame = () => {
-        if (frameIndex >= frames.length) {
-          recorder.requestData();
-          setTimeout(() => {
-            if (recorder.state === 'recording') {
-              recorder.stop();
-            }
-          }, 200);
-          return;
-        }
-        
-        const imgFrame = new Image();
-        imgFrame.onload = () => {
-          ctx.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
-          ctx.drawImage(imgFrame, 0, 0);
-          recorder.requestData();
-          frameIndex++;
-          setTimeout(drawFrame, 50);
-        };
-        imgFrame.onerror = () => {
-          frameIndex++;
-          setTimeout(drawFrame, 50);
-        };
-        imgFrame.src = frames[frameIndex];
-      };
-      
-      drawFrame();
-    };
-    img.onerror = () => {
-      if (frames.length > 1) {
-        const img2 = new Image();
-        img2.onload = function() {
-          const videoCanvas = document.createElement('canvas');
-          videoCanvas.width = img2.width;
-          videoCanvas.height = img2.height;
-          const ctx = videoCanvas.getContext('2d');
-          
-          const mimeType = getSupportedMimeType();
-          if (!mimeType) {
-            reject(new Error('Браузер не поддерживает запись видео'));
-            return;
-          }
-          
-          const chunks = [];
-          const stream = videoCanvas.captureStream(30);
-          const recorder = new MediaRecorder(stream, {
-            mimeType: mimeType,
-            videoBitsPerSecond: 2000000
-          });
-          
-          recorder.ondataavailable = (e) => {
-            if (e.data && e.data.size > 0) {
-              chunks.push(e.data);
-            }
-          };
-          
-          recorder.onstop = () => {
-            const blob = new Blob(chunks, { type: mimeType });
-            console.log(`[${type}] Видео создано: ${blob.size} байт`);
-            
-            if (blob.size > 0) {
-              const url = URL.createObjectURL(blob);
-              videoUrls[type] = url;
-              resolve();
-            } else {
-              reject(new Error(`Видео для ${type} пустое`));
-            }
-          };
-          
-          recorder.onerror = (e) => {
-            reject(e);
-          };
-          
-          recorder.start(100);
-          
-          let frameIndex = 0;
-          const drawFrame = () => {
-            if (frameIndex >= frames.length) {
-              recorder.requestData();
-              setTimeout(() => {
-                if (recorder.state === 'recording') {
-                  recorder.stop();
-                }
-              }, 200);
-              return;
-            }
-            
-            const imgFrame = new Image();
-            imgFrame.onload = () => {
-              ctx.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
-              ctx.drawImage(imgFrame, 0, 0);
-              recorder.requestData();
-              frameIndex++;
-              setTimeout(drawFrame, 50);
-            };
-            imgFrame.onerror = () => {
-              frameIndex++;
-              setTimeout(drawFrame, 50);
-            };
-            imgFrame.src = frames[frameIndex];
-          };
-          
-          drawFrame();
-        };
-        img2.src = frames[1];
-      } else {
-        reject(new Error(`Не удалось загрузить кадры для ${type}`));
-      }
-    };
-    img.src = frames[0];
-  });
-}
-
-function getSupportedMimeType() {
-  const codecs = [
-    'video/webm;codecs=vp9',
-    'video/webm;codecs=vp8',
-    'video/webm;codecs=h264',
-    'video/webm',
-    'video/mp4'
-  ];
-  for (const codec of codecs) {
-    try { if (MediaRecorder.isTypeSupported(codec)) return codec; } catch(e) {}
-  }
-  return null;
-}
-
-function downloadVideo(key) {
-  const type = key.includes('baseline') ? 'baseline' : 'optimized';
-  const url = videoUrls[type];
-  
-  if (url) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = key + '.webm';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    console.log(`Скачивание: ${key}.webm`);
-  } else {
-    alert('Видео ещё не готово. Подождите завершения обработки.');
-  }
-}
-
-// =====================================================================
-// 4. ОБРАБОТЧИКИ СОБЫТИЙ
-// =====================================================================
-
-nSlider.addEventListener('input', (e) => {
-  currentN = parseInt(e.target.value);
-  nValue.textContent = currentN;
-});
-
-nSlider.addEventListener('change', () => {
-  if (!running && !isRecording && !isProcessing) reset();
-});
-
-speedSlider.addEventListener('input', (e) => {
-  speed = parseInt(e.target.value);
-  speedValue.textContent = speed + 'ms';
-});
+speedSlider.addEventListener('input', e => { speed = parseInt(e.target.value); speedValue.textContent = speed + 'ms'; });
 
 document.querySelectorAll('input[name="treeType"]').forEach(el => {
-  el.addEventListener('change', (e) => {
-    currentTreeType = e.target.value;
-    if (!running && !isRecording && !isProcessing) reset();
-  });
+  el.addEventListener('change', e => { currentTreeType = e.target.value; if (!running) reset(); });
 });
 
-startBtn.addEventListener('click', () => {
-  if (running) stop();
-  else start();
-});
-
+startBtn.addEventListener('click', () => { if (running) stop(); else start(); });
 resetBtn.addEventListener('click', reset);
-
 stepBtn.addEventListener('click', () => {
-  if (!running && !isRecording && !isProcessing) {
-    baselineAnim.executeStep();
-    optimizedAnim.executeStep();
-    baselineAnim.draw();
-    optimizedAnim.draw();
-    updateStats();
-    updateProgress();
+  if (!running) {
+    baselineAnim.executeStep(); optimizedAnim.executeStep();
+    baselineAnim.draw(); optimizedAnim.draw();
+    updateStats(); updateProgress();
   }
-});
-
-recordBtn.addEventListener('click', () => {
-  if (isRecording) {
-    isRecording = false;
-    if (running) stop();
-    finishRecording();
-  } else if (recordBtn.textContent.includes('✅')) {
-    reset();
-  } else if (!isProcessing) {
-    startRecording();
-  }
-});
-
-document.querySelectorAll('.download-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const key = this.id.replace('download', '').toLowerCase();
-    downloadVideo(key);
-  });
 });
 
 window.addEventListener('resize', () => {
-  baselineAnim.resize();
-  baselineAnim.positions = baselineAnim.computeLayout();
-  optimizedAnim.resize();
-  optimizedAnim.positions = optimizedAnim.computeLayout();
-  baselineAnim.draw();
-  optimizedAnim.draw();
+  [baselineAnim, optimizedAnim].forEach(a => {
+    a.resize();
+    a.positions = a.computeLayout();
+    a.draw();
+  });
 });
 
 initTree();
-console.log('✅ Демо готово. Используйте "Записать WebM" для создания видео.');
 </script>
 </body>
 </html>
