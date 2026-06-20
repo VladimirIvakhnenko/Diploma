@@ -322,7 +322,7 @@ __pycache__/
 
 # Tabs Studio
 *.tss
-
+.mimocode/
 # Telerik's JustMock configuration file
 *.jmconfig
 
@@ -361,3 +361,21 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Python virtualenv
+myenv/
+
+# C++ build artifacts
+*.exe
+*.o
+*.obj
+*.out
+experiment
+my_cpp_program
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated videos
+*.webm
